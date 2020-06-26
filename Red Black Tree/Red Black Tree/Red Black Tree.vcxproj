@@ -81,9 +81,7 @@
     <ClInclude Include="RBT.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Project0.cpp" />
     <ClCompile Include="Source.cpp" />
-    <ClCompile Include="Source1.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
