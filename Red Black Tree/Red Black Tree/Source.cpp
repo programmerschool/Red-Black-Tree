@@ -5,79 +5,62 @@ using namespace std;
 int main()
 {
 	RBT<int> Tree;
-	Tree.Insert(23);
-	Tree.Insert(44);
-	Tree.Insert(54);
+	Tree.Insert(7);
+	Tree.Insert(3);
+	Tree.Insert(18);
+	Tree.Insert(10);
 	Tree.Insert(22);
+	Tree.Insert(8);
+	Tree.Insert(11);
+	Tree.Insert(26);
 	Tree.Insert(2);
-	Tree.Insert(4);
-	Tree.Insert(77);
-	Tree.Insert(80);
+	Tree.Insert(6);
+	Tree.Insert(13);
 
 	Tree.PrintTree();
 
-	/*R.Insert(10);
-	R.Insert(18);
-	R.Insert(7);
-	R.Insert(15);
-	R.Insert(16);
-	R.Insert(30);
-	R.Insert(25);
-	R.Insert(40);
-	R.Insert(60);
-	R.Insert(2);
-	R.Insert(1);
-	R.Insert(70);*/
+	Tree.Delete(10);
+	cout << endl << endl << endl;
+	Tree.PrintTree();
 
+	Tree.Delete(8);
+	cout << endl << endl << endl;
+	Tree.PrintTree();
 
-	//R.Insert(10);
-	//R.Insert(8);
-	//R.Insert(30);
-	//R.Insert(2);
-	//R.Insert(25);
-	//R.Insert(9);
-	//R.Insert(40);
-	//R.Insert(50);
-	//R.Insert(35);
-	//R.Insert(38);
-	//R.Insert(90);
-	//R.Insert(100);
-	//R.Insert(200);
-	//R.Insert(300);
+	Tree.Delete(7);
+	cout << endl << endl << endl;
+	Tree.PrintTree();
 
-	////R.Print_LNR();
-	////R.Print_LNR();
-	////auto li = R.begin();
-	////++li;
-	//cout << endl;
-	//R.PrintTree();
-	////--li;
-	///*cout << *li << endl;
-	//cout << endl << endl << *(R.ParentOfNode(li))<<endl;*/
-	///*R.Print_LNR();*/
-	//R.Delete(8);
-	//R.PrintTree();
-	//R.Delete(10);
-	//cout << endl << endl << endl << endl << endl;
-	//R.PrintTree();
-	//
-	//R.Delete(40);
-	//cout << endl << endl << endl << endl << endl;
-	//R.PrintTree();
+	Tree.Delete(6);
+	cout << endl << endl << endl;
+	Tree.PrintTree();
 
-	//R.Delete(38);
-	//cout << endl << endl << endl << endl << endl;
-	//R.PrintTree();
+	Tree.Delete(3);
+	cout << endl << endl << endl;
+	Tree.PrintTree();
 
-	//R.Delete(35);
-	//cout << endl << endl << endl << endl << endl;
-	//R.PrintTree();
+	Tree.Delete(18);
+	cout << endl << endl << endl;
+	Tree.PrintTree();
 
-	//R.Delete(90);
-	//cout << endl << endl << endl << endl << endl;
-	//R.PrintTree();
+	Tree.Delete(22);
+	cout << endl << endl << endl;
+	Tree.PrintTree();
 
-	//R.Delete(9);
-	//cout << endl << endl << endl << endl << endl;
-	//R.PrintTree();
+	Tree.Delete(26);
+	cout << endl << endl << endl;
+	Tree.PrintTree();
+
+	Tree.Delete(11);
+	cout << endl << endl << endl;
+	Tree.PrintTree();
+
+	Tree.Delete(2);
+	cout << endl << endl << endl;
+	Tree.PrintTree();
+
+	Tree.Delete(13);
+	cout << endl << endl << endl;
+	Tree.PrintTree();
+
 }

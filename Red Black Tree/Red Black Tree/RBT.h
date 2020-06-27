@@ -15,6 +15,7 @@ class RBT
 		Node* Parent;
 		int Count;
 		bool DoubleBlack;
+		bool DeleteDoubleBlack;
 		// Constructor 
 		Node(T D, Node* P, Color c = RED, int C = 1)
 		{
@@ -25,6 +26,7 @@ class RBT
 			color = c;
 			Count = C;
 			DoubleBlack = false;
+			DeleteDoubleBlack = false;
 		}
 
 		Node(const Node &N)
@@ -36,16 +38,21 @@ class RBT
 			color = N.color;
 			Count = N.Count;
 			DoubleBlack = N.DoubleBlack;
+			DeleteDoubleBlack = N.DeleteDoubleBlack;
 		}
 
 		Node* sibling()
 		{
-			if (this == Parent->Right)
-				return Parent->Left;
-			else
+			if (Parent)
 			{
-				return Parent->Right;
+				if (this == Parent->Right)
+					return Parent->Left;
+				else
+				{
+					return Parent->Right;
+				}
 			}
+			return nullptr;
 		}
 
 		Node* GrandParent(/*Node* N*/)
@@ -99,6 +106,8 @@ class RBT
 			Parent = N->Parent;
 			color = N->color;
 			Count = N->Count;
+			isDoubleBlack = N->isDoubleBlack;
+			DeleteDoubleBlack = N->DeleteDoubleBlack;
 		}
 
 		friend ostream& operator<< (ostream &, const Node &c)
@@ -132,14 +141,71 @@ class RBT
 			if (!Left)
 				return Right;
 		} 
-		bool HaveBothChild()
+		void swapColor(Node* N)
 		{
-			return Right && Left;
+			Color tmp = color;
+			color = N->color;
+			N->color = tmp;
 		}
 		bool isBlackChildren()
 		{
 			return (((!Right || Right->color == BLACK) && (!Left || Left->color == BLACK)) || ((!Left || Left->color == BLACK) && (!Right || Right->color == BLACK)));
 		}
+		bool isBlackRightLineChild(Node* s)
+		{
+			if (Right && Right == s && (Right->Right == nullptr || Right->Right->color == BLACK))
+			{
+				return true;
+			}
+			return false;
+		}
+		bool isBlackLeftLineChild(Node* s)
+		{
+			if (Left && Left == s && (Left->Left == nullptr || Left->Left->color == BLACK))
+			{
+				return true;
+			}
+			return false;
+		}
+
+		bool isRedRightLineChild(Node* s)
+		{
+			if (Right && Right == s && Right->Right && Right->Right->color == RED)
+			{
+				return true;
+			}
+			return false;
+		}
+		bool isRedLeftLineChild(Node* s)
+		{
+			if (Left && Left == s && Left->Left && Left->Left->color == RED)
+			{
+				return true;
+			}
+			return false;
+		}
+
+		bool isRedRightTriangleChild(Node* s)
+		{
+			if (Right && Right == s && Right->Left && Right->Left->color == RED)
+			{
+				return true;
+			}
+			return false;
+		}
+		bool isRedLeftTriangleChild(Node* s)
+		{
+			if (Left && Left == s && Left->Right && Left->Right->color == RED)
+			{
+				return true;
+			}
+			return false;
+		}
+		bool HaveBothChild()
+		{
+			return Right && Left;
+		}
+		
 		bool isDoubleBlack()
 		{
 			return DoubleBlack;
@@ -152,7 +218,10 @@ class RBT
 			}
 			return  true;
 		}
-		
+		bool isBothChildrenRed()
+		{
+			return Right && Right->color == RED && Left && Left->color == RED;
+		}
 	};
 	
 public:
@@ -571,6 +640,163 @@ private:
 		}
 	}
 
+	void RemoveDoubleBlack(Node* NTD)
+	{
+		if (NTD->isDoubleBlack() && NTD == Root)
+		{
+			NTD->DoubleBlack = false;
+		}
+		else
+		if (NTD->isDoubleBlack() && NTD->sibling() && NTD->sibling()->color == RED)
+		{
+			NTD->Parent->swapColor(NTD->sibling());
+			if (NTD == NTD->Parent->Left)
+			{
+				RotateLeft(NTD->Parent);
+			}
+			else
+			{
+				RotateRight(NTD->Parent);
+			}
+			RemoveDoubleBlack(NTD);
+		}
+		else
+		if (NTD->isDoubleBlack() && (!NTD->sibling() || NTD->sibling()->color == BLACK) && (!NTD->sibling() || NTD->sibling()->isBlackChildren()))
+		{
+			NTD->DoubleBlack = false;
+			if (!NTD->Parent || NTD->Parent->color == BLACK)
+			{
+				NTD->Parent->DoubleBlack = true;
+				NTD->sibling()->AlterColor();
+				Node* X = NTD->Parent;
+				if (NTD->DeleteDoubleBlack)
+				{
+					if (NTD == NTD->Parent->Right)
+						NTD->Parent->Right = nullptr;
+					else
+						NTD->Parent->Left = nullptr;
+					delete NTD;
+					NTD = nullptr;
+				}
+				RemoveDoubleBlack(X);
+				return;
+			}
+			else
+			{
+				NTD->sibling()->AlterColor();
+				NTD->Parent->color = BLACK;
+			}
+
+			if (NTD->DeleteDoubleBlack)
+			{
+				if (NTD == NTD->Parent->Right)
+					NTD->Parent->Right = nullptr;
+				else
+					NTD->Parent->Left = nullptr;
+				delete NTD;
+				NTD = nullptr;
+			}
+			return;
+		}
+		else
+		if (NTD->isDoubleBlack() && NTD->sibling() && NTD->sibling()->color == BLACK && (!NTD->sibling()->isSameChildren() || NTD->sibling()->isBothChildrenRed()))
+		{
+			if (!NTD->sibling()->isBothChildrenRed())
+			{
+				if (NTD->Parent->isBlackRightLineChild(NTD->sibling()) && NTD->Parent->isRedRightTriangleChild(NTD->sibling()))
+				{
+					NTD->sibling()->swapColor(NTD->Parent->Right->Left);
+					Node* X = NTD->sibling();
+					RotateRight(X);
+				}
+				else
+				if (NTD->Parent->isBlackLeftLineChild(NTD->sibling()) && NTD->Parent->isRedLeftTriangleChild(NTD->sibling()))
+				{
+					NTD->sibling()->swapColor(NTD->Parent->Left->Right);
+					Node* X = NTD->sibling();
+					RotateLeft(X);
+				}
+			}
+
+			if (NTD->sibling()->color == BLACK && NTD->Parent->isRedRightLineChild(NTD->sibling()))
+			{
+				NTD->Parent->swapColor(NTD->sibling());
+				NTD->sibling()->Right->color = BLACK;
+				RotateLeft(NTD->Parent);
+				NTD->DoubleBlack = false;
+
+			}
+			else
+			if (NTD->sibling()->color == BLACK && NTD->Parent->isRedLeftLineChild(NTD->sibling()))//*
+			{
+				NTD->Parent->swapColor(NTD->sibling());
+				NTD->sibling()->Left->color = BLACK;
+				RotateRight(NTD->Parent);
+				NTD->DoubleBlack = false;
+
+			}
+
+			if (NTD->DeleteDoubleBlack)
+			{
+				if (NTD == NTD->Parent->Right)
+					NTD->Parent->Right = nullptr;
+				else
+					NTD->Parent->Left = nullptr;
+				delete NTD;
+				NTD = nullptr;
+			}
+			return;
+		}
+	}
+	void Delete(Node *NTD)
+	{
+		if (NTD->HaveBothChild())
+		{
+			Node* X = predecessor(NTD);
+			NTD->Data = X->Data;
+			Delete(X);
+		}
+		else
+		if (NTD->isOneChild())
+		{
+			Node* X = nullptr;
+			if (NTD->Right == nullptr)
+			{
+				X = predecessor(NTD);
+			}
+			else
+			{
+				X = successor(NTD);
+			}
+			NTD->Data = X->Data;
+			Delete(X);
+
+		}
+		else // Case 1: If NTD is Leaf Node and its Color is Red then simply delete it. 
+		if (NTD->color == RED && NTD->isLeafNode())
+		{
+			if (NTD == NTD->Parent->Right)
+				NTD->Parent->Right = nullptr;
+			else
+				NTD->Parent->Left = nullptr;
+			delete NTD;
+			NTD = nullptr;
+			return;
+		}
+		else
+		if (NTD->color == BLACK && NTD->isLeafNode())
+		{
+
+			if (NTD != Root)
+			{
+				NTD->DoubleBlack = true;
+				NTD->DeleteDoubleBlack = true;
+				RemoveDoubleBlack(NTD);
+			}
+			return;
+		}
+	}
+
 public:
 	RBT()
 	{
@@ -658,166 +884,20 @@ public:
 		copyTree(this->Root, B.Root);
 	}
 
-	void Delete(Node *NTD)
-	{
-		// Case 1: If NTD is Leaf Node and its Color is Red then simply delete it. 
-		if (NTD->color == RED && NTD->isLeafNode()) 
-		{
-			if (NTD == NTD->Parent->Right)
-				NTD->Parent->Right = nullptr;
-			else
-				NTD->Parent->Left = nullptr;
-			delete NTD;
-			NTD = nullptr;
-			return;
-		}
-		else //Case 2: If NTD is BLACK with one child in color RED then replace the Data of NTD with child and delete child.
-		if (!NTD->isDoubleBlack() && NTD->color == BLACK && NTD->isOneChild() && NTD->OneChild()->color == RED) 
-		{
-			Node* X = NTD->OneChild();
-			NTD->Data = X->Data;
-			Delete(X);
-		}
-		else
-		if (NTD->color == BLACK && NTD->HaveBothChild())
-		{
-			Node* X = predecessor(NTD);
-			NTD->Data = X->Data;
-			Delete(X);
-			return;
-		}
-		else // If Root is Double Black then Change it's color to single black.
-		if (NTD == Root && NTD->isDoubleBlack())
-		{
-			NTD->DoubleBlack = false;
-			return;
-		}
-		else //Case : If NTD is Double Black and it's Parent is Red, it's sibling is Black and color of sibling's children is also Black then Change the color of both Parent and sibling.
-		if (NTD->isDoubleBlack() && NTD->Parent->color == RED && NTD->sibling()->color == BLACK && NTD->sibling()->isBlackChildren())
-		{
-			NTD->DoubleBlack = false;
-			NTD->Parent->AlterColor();
-			NTD->sibling()->AlterColor();
-
-			if (NTD == NTD->Parent->Right)
-				NTD->Parent->Right = nullptr;
-			else
-				NTD->Parent->Left = nullptr;
-			delete NTD;
-			NTD = nullptr;
-			return;
-		}
-		else
-		if (NTD->isDoubleBlack() && NTD->Parent->color == BLACK && NTD->sibling()->color == RED && NTD->sibling()->isBlackChildren())
-		{
-			NTD->Parent->AlterColor();
-			NTD->sibling()->AlterColor();
-			if (NTD->Parent->Left && NTD == NTD->Parent->Left)
-			{
-				RotateLeft(NTD->Parent);
-			}
-			else
-			{
-				RotateRight(NTD->Parent);
-			}
-			Delete(NTD);
-		}
-		else
-		if (NTD->isDoubleBlack() && NTD->sibling()->color == BLACK && !NTD->sibling()->isBlackChildren())
-		{
-			if (NTD->Parent->Left && NTD == NTD->Parent->Left)
-			{
-				NTD->sibling()->Right->AlterColor();
-				RotateLeft(NTD->Parent);
-			}
-			else
-			{
-				NTD->sibling()->Left->AlterColor();
-				RotateRight(NTD->Parent);
-			}
-			if (NTD == NTD->Parent->Right)
-				NTD->Parent->Right = nullptr;
-			else
-				NTD->Parent->Left = nullptr;
-			delete NTD;
-			NTD = nullptr;
-			return;
-		}
-		else
-		if (NTD->isDoubleBlack() && NTD->Parent->color == BLACK && NTD->sibling()->color == BLACK && !NTD->sibling()->isSameChildren())
-		{
-			Node* X = NTD->sibling();
-			//NTD on left and sbling child on left
-			if (NTD == NTD->Parent->Left && NTD->sibling()->Left->color == RED)
-			{
-				NTD->sibling()->Left->AlterColor();
-				NTD->sibling()->AlterColor();
-				RotateRight(X);
-			}
-			else
-			if (NTD == NTD->Parent->Right && NTD->sibling()->Right && NTD->sibling()->Right->color == RED)
-			{
-				NTD->sibling()->Right->AlterColor();
-				NTD->sibling()->AlterColor();
-				RotateLeft(X);
-			}
-			if (NTD == NTD->Parent->Left && NTD->sibling()->Right && NTD->sibling()->Right->color == RED)
-			{
-				RotateLeft(NTD->Parent);
-				NTD->DoubleBlack = false;
-				NTD->GrandParent()->Right->AlterColor();
-				if (NTD == NTD->Parent->Right)
-					NTD->Parent->Right = nullptr;
-				else
-					NTD->Parent->Left = nullptr;
-				delete NTD;
-				NTD = nullptr;
-				return;
-			}
-			else
-			if (NTD == NTD->Parent->Right && NTD->sibling()->Left->color == RED)
-			{
-				RotateRight(NTD->Parent);
-				NTD->DoubleBlack = false;
-				NTD->GrandParent()->Left->AlterColor();
-				if (NTD == NTD->Parent->Right)
-					NTD->Parent->Right = nullptr;
-				else
-					NTD->Parent->Left = nullptr;
-				delete NTD;
-				NTD = nullptr;
-				return;
-			}
-			
-		}
-		else
-		if (NTD->isDoubleBlack() && NTD->Parent->color == BLACK && NTD->sibling()->color == BLACK && NTD->sibling()->isBlackChildren())
-		{
-			NTD->DoubleBlack = false;
-			Node *X = NTD->Parent;
-			X->DoubleBlack = true;
-			NTD->sibling()->AlterColor();
-			if (NTD == NTD->Parent->Right)
-				NTD->Parent->Right = nullptr;
-			else
-				NTD->Parent->Left = nullptr;
-			delete NTD;
-			NTD = nullptr;
-			Delete(X);
-		}
-		else
-		if (NTD->color == BLACK && NTD->isLeafNode())
-		{
-			NTD->DoubleBlack = true;
-			Delete(NTD);
-		}
-	}
-
 	void Delete(T Value)
 	{
 		Node* NTD = SEARCH(Value, Root); //Node To Delete
-		if (NTD)
-			Delete(NTD);
+		if (NTD == Root && !NTD->Right && !NTD->Left)
+		{
+			delete NTD;
+			NTD = nullptr;
+			Root = nullptr;
+		}
+		else
+		{
+			if (NTD)
+				Delete(NTD);
+		}
 	}
 
 	iteratorLNR begin()
