@@ -19,7 +19,7 @@ int main()
 
 	Tree.PrintTree();
 
-	Tree.Delete(10);
+	/*Tree.Delete(10);
 	cout << endl << endl << endl;
 	Tree.PrintTree();
 
@@ -61,6 +61,35 @@ int main()
 
 	Tree.Delete(13);
 	cout << endl << endl << endl;
+	Tree.PrintTree();*/
+	
+	//RBT<int> X = Tree;
+	//X.PrintTree();
+	Tree.DeleteValuesGreaterThenX(10);
+	cout << endl << endl << endl;
+	Tree.PrintTree();
+	//X.destroyTree();
+
+
+	/*cout << endl << endl << endl;
+	Tree.PrintTree();
+	Tree.Delete(11);
+	cout << endl << endl << endl;
 	Tree.PrintTree();
 
+	Tree.Delete(18);
+	cout << endl << endl << endl;
+	Tree.PrintTree();
+
+	Tree.Delete(26);
+	cout << endl << endl << endl;
+	Tree.PrintTree();
+
+	Tree.Delete(22);
+	cout << endl << endl << endl;
+	Tree.PrintTree();
+
+	Tree.Delete(13);
+	cout << endl << endl << endl;
+	Tree.PrintTree();*/
 }

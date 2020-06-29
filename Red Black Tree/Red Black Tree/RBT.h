@@ -1,5 +1,6 @@
 #pragma once
 #include<iostream>
+#include<fstream>
 using namespace std;
 template<typename T>
 
@@ -597,7 +598,7 @@ private:
 		DeleteDuplicates(R->Right);
 	}
 
-	void copyTree(Node* Destination, Node* Source)
+	void copyTree(Node* &Destination, Node* Source)
 	{
 		if (Source == nullptr)
 		{
@@ -605,7 +606,7 @@ private:
 		}
 		else
 		{
-			Destination = new Node<T>(Source->Data, Source->Parent);
+			Destination = new Node(Source->Data, Source->Parent, Source->color, Source->Count);
 			copyTree(Destination->Left, Source->Left);
 			copyTree(Destination->Right, Source->Right);
 		}
@@ -613,7 +614,7 @@ private:
 
 	void Clear(Node* RootNode)
 	{
-		if (RootNode)              // if BST is not empty
+		if (RootNode)              // if RBT is not empty
 		{
 			Node *Parent = nullptr;        // Node Pointer to Store Parent 
 
@@ -748,6 +749,7 @@ private:
 			return;
 		}
 	}
+
 	void Delete(Node *NTD)
 	{
 		if (NTD->HaveBothChild())
@@ -795,6 +797,23 @@ private:
 			}
 			return;
 		}
+	}
+
+	void SaveRBT(Node *Root, ofstream& fout)
+	{
+		if (Root != NULL)
+		{
+			fout << Root->Data << " ";
+			if (Root->Left)
+			{
+				SaveBST(Root->Left, fout);
+			}
+			if (Root->Right)
+			{
+				SaveBST(Root->Right, fout);
+			}
+		}
+		else return;
 	}
 
 public:
@@ -900,6 +919,45 @@ public:
 		}
 	}
 
+	void SaveBST(string FileName)
+	{
+		ofstream fout(FileName);
+		SaveBST(this->Root, fout);
+		fout.close();
+	}
+
+	void LoadBST(string FileName)
+	{
+		ifstream fin(FileName);
+		T Value;
+		while (fin >> Value)
+		{
+			this->Insert(Value);
+		}
+	}
+
+	//Node* DeleteValuesGreaterThenX(Node* N,T X)
+	//{
+	//	if (N == nullptr)
+	//	{
+	//		return N;
+	//	}
+	//	if (N->Data > X)
+	//	{
+	//		Node* L = N->Left;
+	//		//cout << N->Data << " ";
+	//		Delete(N->Data);
+	//		return L;
+	//	}
+	//	N->Left = DeleteValuesGreaterThenX(N->Left, X);
+	//	N->Right = DeleteValuesGreaterThenX(N->Right, X);
+	//	return N;
+	//}
+
+	//void DeleteValuesGreaterThenX(T X)
+	//{
+	//	DeleteValuesGreaterThenX(Root, X);
+	//}
 	iteratorLNR begin()
 	{
 		return iteratorLNR(min(Root));
