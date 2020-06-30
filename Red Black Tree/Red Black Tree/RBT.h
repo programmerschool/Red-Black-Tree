@@ -498,6 +498,7 @@ private:
 		if (X != nullptr)
 		{
 			PrintTreeRecursively(X->Right, Distance + 1);
+			cout << "\t\t\t\t";
 			for (int i = 0; i <= Distance + 1; i++)
 			{
 				cout << "\t";
@@ -816,6 +817,17 @@ private:
 		else return;
 	}
 
+	Node* NodeGreaterThenX(Node* R, T Value)
+	{
+		while (R && Value >= R->Data)
+		{
+			if (Value < R->Data)
+				R = R->Left;
+			else
+				R = R->Right;
+		}
+		return R;
+	}
 public:
 	RBT()
 	{
@@ -851,7 +863,9 @@ public:
 	//PreOrder
 	void Print_NLR()
 	{
+		cout << "\t\t\t\t";
 		NLR_Recursively(Root);
+		cout << endl << endl;
 	}
 	void Print_NRL()
 	{
@@ -860,7 +874,9 @@ public:
 	//PostOrder
 	void Print_LRN()
 	{
+		cout << "\t\t\t\t";
 		LRN_Recursively(Root);
+		cout << endl << endl;
 	}
 	void Print_RLN()
 	{
@@ -898,9 +914,10 @@ public:
 		}
 	}
 
-	RBT& operator= (const RBT &B)
+	RBT& operator= (RBT &B)
 	{
 		copyTree(this->Root, B.Root);
+		return *this;
 	}
 
 	void Delete(T Value)
@@ -913,10 +930,21 @@ public:
 			Root = nullptr;
 		}
 		else
+		if (NTD->Count > 1)
+		{
+			NTD->Count--;
+			return;
+		}
+		else
 		{
 			if (NTD)
 				Delete(NTD);
 		}
+	}
+
+	bool isEmpty()
+	{
+		return Root == nullptr;
 	}
 
 	void SaveBST(string FileName)
@@ -926,7 +954,7 @@ public:
 		fout.close();
 	}
 
-	void LoadBST(string FileName)
+	void LoadRBT(string FileName)
 	{
 		ifstream fin(FileName);
 		T Value;
@@ -936,36 +964,27 @@ public:
 		}
 	}
 
-	//Node* DeleteValuesGreaterThenX(Node* N,T X)
-	//{
-	//	if (N == nullptr)
-	//	{
-	//		return N;
-	//	}
-	//	if (N->Data > X)
-	//	{
-	//		Node* L = N->Left;
-	//		//cout << N->Data << " ";
-	//		Delete(N->Data);
-	//		return L;
-	//	}
-	//	N->Left = DeleteValuesGreaterThenX(N->Left, X);
-	//	N->Right = DeleteValuesGreaterThenX(N->Right, X);
-	//	return N;
-	//}
+	void DeleteValuesGreaterThenX(T X)
+	{
+		Node* R = Root;
+		while (R)
+		{
+			R = NodeGreaterThenX(Root, X);
+			if (R && R->Data > X)
+				Delete(R->Data);
+		}
+	}
 
-	//void DeleteValuesGreaterThenX(T X)
-	//{
-	//	DeleteValuesGreaterThenX(Root, X);
-	//}
 	iteratorLNR begin()
 	{
 		return iteratorLNR(min(Root));
 	}
+
 	iteratorLNR end()
 	{
 		return nullptr;
 	}
+
 	~RBT()
 	{
 		destroyTree();
